@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { db } from "../lib/firebase";
-import { collection, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
-import type { Measurement } from "../lib/types";  // <-- Use type-only import
-import { useAuth } from "../contexts/AuthContext";
+import { useState, useEffect } from 'react';
+import { db } from '../lib/firebase';
+import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
+import type { Measurement } from '../lib/types';
 
 export const useMeasurements = () => {
   const { user } = useAuth();
@@ -10,37 +10,71 @@ export const useMeasurements = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    const q = query(collection(db, "measurements"), where("tailorId", "==", user.uid));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().date.toDate(),
-        createdAt: doc.data().createdAt.toDate(),
-      })) as Measurement[];
-      setMeasurements(data);
+    if (!user) {
       setLoading(false);
-    });
+      setMeasurements([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'measurements'),
+      where('tailorId', '==', user.uid)
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+
+          // Helper to safely convert Firestore timestamps to Date
+          const safeToDate = (value: any): Date => {
+            if (value instanceof Timestamp) {
+              return value.toDate();
+            }
+            // If it's already a Date (unlikely from Firestore), return as is
+            if (value instanceof Date) {
+              return value;
+            }
+            // Fallback: current date
+            return new Date();
+          };
+
+          const date = safeToDate(docData.date);
+          const createdAt = safeToDate(docData.createdAt);
+          const measurementsObj = docData.measurements || {};
+
+          return {
+            id: doc.id,
+            tailorId: docData.tailorId,
+            customerName: docData.customerName || '',
+            customerPhone: docData.customerPhone || null,
+            date,
+            measurements: {
+              chest: measurementsObj.chest || 0,
+              waist: measurementsObj.waist || 0,
+              length: measurementsObj.length || 0,
+              shoulder: measurementsObj.shoulder || 0,
+            },
+            notes: docData.notes || null,
+            createdAt,
+          } as Measurement;
+        });
+
+        // Sort newest first
+        data.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+        setMeasurements(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching measurements:', error);
+        setLoading(false);
+      }
+    );
+
     return unsubscribe;
   }, [user]);
 
-  const addMeasurement = async (measurement: Omit<Measurement, "id" | "tailorId" | "createdAt">) => {
-    if (!user) return;
-    await addDoc(collection(db, "measurements"), {
-      ...measurement,
-      tailorId: user.uid,
-      createdAt: new Date(),
-    });
-  };
-
-  const updateMeasurement = async (id: string, updates: Partial<Measurement>) => {
-    await updateDoc(doc(db, "measurements", id), updates);
-  };
-
-  const deleteMeasurement = async (id: string) => {
-    await deleteDoc(doc(db, "measurements", id));
-  };
-
-  return { measurements, loading, addMeasurement, updateMeasurement, deleteMeasurement };
+  return { measurements, loading };
 };

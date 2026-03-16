@@ -13,39 +13,41 @@ export const BottomNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-black/20 backdrop-blur-md border-t border-white/10 flex justify-around items-center h-16 px-2 z-10">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.href;
-        const Icon = item.icon;
+    <nav className="fixed bottom-0 left-0 right-0 bg-black/20 backdrop-blur-md border-t border-white/10 flex justify-center items-center h-14 px-1 z-10">
+      <div className="flex items-center gap-1 max-w-md w-full justify-around">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.href;
+          const Icon = item.icon;
 
-        if (item.disabled) {
+          if (item.disabled) {
+            return (
+              <div
+                key={item.name}
+                className="flex flex-col items-center justify-center py-1 px-1 text-white/30 cursor-not-allowed"
+                title="Coming soon"
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-[0.6rem] mt-0.5">{item.name}</span>
+              </div>
+            );
+          }
+
           return (
-            <div
+            <Link
               key={item.name}
-              className="flex flex-col items-center justify-center flex-1 py-1 text-white/30 cursor-not-allowed"
-              title="Coming soon"
+              to={item.href}
+              className={`flex flex-col items-center justify-center py-1 px-1 transition ${
+                isActive 
+                  ? 'text-indigo-400' 
+                  : 'text-white/50 hover:text-white/80'
+              }`}
             >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs mt-1">{item.name}</span>
-            </div>
+              <Icon className="h-4 w-4" />
+              <span className="text-[0.6rem] mt-0.5">{item.name}</span>
+            </Link>
           );
-        }
-
-        return (
-          <Link
-            key={item.name}
-            to={item.href}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition ${
-              isActive 
-                ? 'text-indigo-400' 
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="text-xs mt-1">{item.name}</span>
-          </Link>
-        );
-      })}
+        })}
+      </div>
     </nav>
   );
 };
