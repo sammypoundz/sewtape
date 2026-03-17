@@ -22,10 +22,12 @@ export type Measurement = {
 export type Reminder = {
   id?: string;
   tailorId: string;
-  relatedMeasurementId?: string;
   title: string;
-  description?: string;
+  description?: string | null;
   remindAt: Date;
   isCompleted: boolean;
+  relatedClient?: string | null;          // ✅ new field for client name
+  relatedMeasurementId?: string | null;   // (optional, if you keep it)
+  notificationId?: number | null;         // ✅ for tracking scheduled notification
   createdAt: Date;
 };

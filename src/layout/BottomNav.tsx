@@ -5,8 +5,8 @@ const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Measurements', href: '/measurements', icon: Ruler },
   { name: 'Reminders', href: '/reminders', icon: Bell },
-  { name: 'Marketplace', href: '/marketplace', icon: Package, disabled: true },
-  { name: 'Clients', href: '/clients', icon: Users, disabled: true },
+  { name: 'Marketplace', href: '/marketplace', icon: Package },
+  { name: 'Clients', href: '/clients', icon: Users },
 ];
 
 export const BottomNav = () => {
@@ -19,27 +19,12 @@ export const BottomNav = () => {
           const isActive = location.pathname === item.href;
           const Icon = item.icon;
 
-          if (item.disabled) {
-            return (
-              <div
-                key={item.name}
-                className="flex flex-col items-center justify-center py-1 px-1 text-white/30 cursor-not-allowed"
-                title="Coming soon"
-              >
-                <Icon className="h-4 w-4" />
-                <span className="text-[0.6rem] mt-0.5">{item.name}</span>
-              </div>
-            );
-          }
-
           return (
             <Link
               key={item.name}
               to={item.href}
               className={`flex flex-col items-center justify-center py-1 px-1 transition ${
-                isActive 
-                  ? 'text-indigo-400' 
-                  : 'text-white/50 hover:text-white/80'
+                isActive ? 'text-indigo-400' : 'text-white/50 hover:text-white/80'
               }`}
             >
               <Icon className="h-4 w-4" />

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#111827</color>          <!-- dark gray -->
+    <color name="colorPrimaryDark">#111827</color>      <!-- same dark gray -->
+    <color name="colorAccent">#818CF8</color>           <!-- indigo-400 -->
+    <color name="status_bar">#111827</color>            <!-- status bar background -->
+</resources>
